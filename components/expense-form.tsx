@@ -227,7 +227,7 @@ export const ExpenseForm = ({ friends, categories, onAddExpense }: ExpenseFormPr
           </div>
         </div>
 
-        <div className="space-y-1 sm:space-y-2">
+        <div className="space-y-3 sm:space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-sm sm:text-base">Participants</Label>
             {eligibleParticipants.length > 0 && (
@@ -236,7 +236,7 @@ export const ExpenseForm = ({ friends, categories, onAddExpense }: ExpenseFormPr
                   id="selectAll"
                   checked={selectAll}
                   onCheckedChange={toggleSelectAll}
-                  className="h-3 w-3 sm:h-4 sm:w-4"
+                  className="h-4 w-4 sm:h-5 sm:w-5"
                 />
                 <Label htmlFor="selectAll" className="text-xs sm:text-sm">
                   Select All
@@ -248,18 +248,18 @@ export const ExpenseForm = ({ friends, categories, onAddExpense }: ExpenseFormPr
           {eligibleParticipants.length === 0 ? (
             <p className="text-amber-600 text-xs sm:text-sm">No eligible participants for this category based on preferences.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-2">
+            <div className="grid grid-cols-2 mt-10 sm:grid-cols-3 gap-1 sm:gap-2">
               {eligibleParticipants.map((friend) => (
                 <div key={friend.id} className="flex items-center space-x-1 sm:space-x-2">
                   <Checkbox
                     id={`participant-${friend.id}`}
                     checked={participants.includes(friend.id)}
                     onCheckedChange={() => toggleParticipant(friend.id)}
-                    className="h-3 w-3 sm:h-4 sm:w-4"
+                    className="h-4 w-4 sm:h-5 sm:w-5"
                   />
                   <Label
                     htmlFor={`participant-${friend.id}`}
-                    className="text-xs sm:text-sm"
+                    className="text-sm"
                   >
                     {friend.name}
                   </Label>
