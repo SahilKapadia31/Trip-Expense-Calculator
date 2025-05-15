@@ -1,13 +1,12 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState, useEffect } from "react"
 import type { Friend, Expense } from "./trip-expense-calculator"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ArrowRight, Download, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useMobile } from "@/hooks/use-mobile"
-import html2pdf from 'html2pdf.js'
 
 interface SettlementSummaryProps {
   friends: Friend[]
@@ -179,163 +178,203 @@ export const SettlementSummary = ({ friends, expenses, currency }: SettlementSum
     document.body.removeChild(link)
   }
 
-  const downloadSettlementPDF = () => {
-    // Create a temporary div to render our PDF content
-    const element = document.createElement('div');
-    element.style.padding = '20px';
-    element.style.fontFamily = 'Arial, sans-serif';
+  const [html2pdfModule, setHtml2pdfModule] = useState<any>(null)
 
-    // Add title and date
-    const title = document.createElement('h1');
-    title.textContent = 'Trip Settlement Summary';
-    title.style.color = '#0f766e'; // teal-700
-    title.style.marginBottom = '10px';
-    element.appendChild(title);
-
-    const date = document.createElement('p');
-    date.textContent = `Generated on ${new Date().toLocaleDateString()}`;
-    date.style.marginBottom = '20px';
-    date.style.color = '#6b7280'; // gray-500
-    element.appendChild(date);
-
-    // Add total expenses
-    const totalSection = document.createElement('div');
-    totalSection.style.marginBottom = '20px';
-    totalSection.style.textAlign = 'right';
-
-    const totalLabel = document.createElement('p');
-    totalLabel.textContent = 'Total Trip Expenses';
-    totalLabel.style.color = '#6b7280'; // gray-500
-    totalLabel.style.margin = '0';
-    totalSection.appendChild(totalLabel);
-
-    const totalAmount = document.createElement('p');
-    totalAmount.textContent = `${currencySymbol}${totalExpenses.toFixed(2)}`;
-    totalAmount.style.fontSize = '24px';
-    totalAmount.style.fontWeight = 'bold';
-    totalAmount.style.color = '#0f766e'; // teal-700
-    totalAmount.style.margin = '0';
-    totalSection.appendChild(totalAmount);
-
-    element.appendChild(totalSection);
-
-    // Add balances section
-    const balancesTitle = document.createElement('h2');
-    balancesTitle.textContent = 'Individual Balances';
-    balancesTitle.style.color = '#0f766e'; // teal-700
-    balancesTitle.style.marginTop = '30px';
-    element.appendChild(balancesTitle);
-
-    const balancesTable = document.createElement('table');
-    balancesTable.style.width = '100%';
-    balancesTable.style.borderCollapse = 'collapse';
-    balancesTable.style.marginBottom = '30px';
-
-    // Add table header
-    const balancesHeader = document.createElement('tr');
-    ['Friend', 'Paid', 'Owes', 'Net Balance'].forEach(text => {
-      const th = document.createElement('th');
-      th.textContent = text;
-      th.style.textAlign = text === 'Friend' ? 'left' : 'right';
-      th.style.padding = '8px';
-      th.style.borderBottom = '1px solid #e5e7eb'; // gray-200
-      balancesHeader.appendChild(th);
-    });
-    balancesTable.appendChild(balancesHeader);
-
-    // Add rows for each friend
-    balances.forEach(balance => {
-      const row = document.createElement('tr');
-
-      const nameCell = document.createElement('td');
-      nameCell.textContent = getFriendName(balance.friendId);
-      nameCell.style.padding = '8px';
-      nameCell.style.borderBottom = '1px solid #e5e7eb'; // gray-200
-      row.appendChild(nameCell);
-
-      const paidCell = document.createElement('td');
-      paidCell.textContent = `${currencySymbol}${balance.paid.toFixed(2)}`;
-      paidCell.style.textAlign = 'right';
-      paidCell.style.padding = '8px';
-      paidCell.style.borderBottom = '1px solid #e5e7eb'; // gray-200
-      row.appendChild(paidCell);
-
-      const owesCell = document.createElement('td');
-      owesCell.textContent = `${currencySymbol}${balance.owes.toFixed(2)}`;
-      owesCell.style.textAlign = 'right';
-      owesCell.style.padding = '8px';
-      owesCell.style.borderBottom = '1px solid #e5e7eb'; // gray-200
-      row.appendChild(owesCell);
-
-      const netCell = document.createElement('td');
-      netCell.textContent = `${balance.netBalance > 0 ? '+' : ''}${currencySymbol}${balance.netBalance.toFixed(2)}`;
-      netCell.style.textAlign = 'right';
-      netCell.style.padding = '8px';
-      netCell.style.fontWeight = 'bold';
-      netCell.style.color = balance.netBalance > 0 ? '#059669' : balance.netBalance < 0 ? '#dc2626' : '#000000';
-      netCell.style.borderBottom = '1px solid #e5e7eb'; // gray-200
-      row.appendChild(netCell);
-
-      balancesTable.appendChild(row);
-    });
-
-    element.appendChild(balancesTable);
-
-    // Add settlement plan section
-    const planTitle = document.createElement('h2');
-    planTitle.textContent = 'Settlement Plan';
-    planTitle.style.color = '#0f766e'; // teal-700
-    planTitle.style.marginTop = '30px';
-    element.appendChild(planTitle);
-
-    if (transactions.length === 0) {
-      const noTransactions = document.createElement('p');
-      noTransactions.textContent = 'Everyone is settled up!';
-      noTransactions.style.textAlign = 'center';
-      noTransactions.style.color = '#6b7280'; // gray-500
-      noTransactions.style.fontStyle = 'italic';
-      element.appendChild(noTransactions);
-    } else {
-      transactions.forEach((transaction, index) => {
-        const transactionDiv = document.createElement('div');
-        transactionDiv.style.padding = '10px';
-        transactionDiv.style.border = '1px solid #e5e7eb'; // gray-200
-        transactionDiv.style.borderRadius = '8px';
-        transactionDiv.style.marginBottom = '10px';
-        transactionDiv.style.display = 'flex';
-        transactionDiv.style.justifyContent = 'space-between';
-        transactionDiv.style.alignItems = 'center';
-
-        const fromName = document.createElement('div');
-        fromName.textContent = getFriendName(transaction.from);
-        fromName.style.fontWeight = 'bold';
-        transactionDiv.appendChild(fromName);
-
-        const amountDiv = document.createElement('div');
-        amountDiv.textContent = `${currencySymbol}${transaction.amount.toFixed(2)}`;
-        amountDiv.style.color = '#0f766e'; // teal-700
-        amountDiv.style.fontWeight = 'bold';
-        transactionDiv.appendChild(amountDiv);
-
-        const toName = document.createElement('div');
-        toName.textContent = getFriendName(transaction.to);
-        toName.style.fontWeight = 'bold';
-        transactionDiv.appendChild(toName);
-
-        element.appendChild(transactionDiv);
-      });
+  useEffect(() => {
+    let isMounted = true
+    // Dynamically import html2pdf.js
+    const loadPdfModule = async () => {
+      try {
+        const module = await import('html2pdf.js')
+        if (isMounted) {
+          setHtml2pdfModule(module.default || module)
+        }
+      } catch (error) {
+        console.error('Failed to load html2pdf.js:', error)
+      }
     }
 
-    // Generate PDF
-    const opt = {
-      margin: 10,
-      filename: `trip-settlement-${new Date().toISOString().split("T")[0]}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
+    loadPdfModule()
 
-    html2pdf().from(element).set(opt).save();
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const downloadSettlementPDF = () => {
+    // Ensure html2pdf is loaded
+    if (html2pdfModule) {
+      // Create a temporary div to render our PDF content
+      const element = document.createElement('div');
+      element.style.padding = '20px';
+      element.style.fontFamily = 'Arial, sans-serif';
+
+      // Add title and date
+      const title = document.createElement('h1');
+      title.textContent = 'Trip Settlement Summary';
+      title.style.color = '#0f766e'; // teal-700
+      title.style.marginBottom = '10px';
+      element.appendChild(title);
+
+      const date = document.createElement('p');
+      date.textContent = `Generated on ${new Date().toLocaleDateString()}`;
+      date.style.marginBottom = '20px';
+      date.style.color = '#6b7280'; // gray-500
+      element.appendChild(date);
+
+      // Add total expenses
+      const totalSection = document.createElement('div');
+      totalSection.style.marginBottom = '20px';
+      totalSection.style.textAlign = 'right';
+
+      const totalLabel = document.createElement('p');
+      totalLabel.textContent = 'Total Trip Expenses';
+      totalLabel.style.color = '#6b7280'; // gray-500
+      totalLabel.style.margin = '0';
+      totalSection.appendChild(totalLabel);
+
+      const totalAmount = document.createElement('p');
+      totalAmount.textContent = `${currencySymbol}${totalExpenses.toFixed(2)}`;
+      totalAmount.style.fontSize = '24px';
+      totalAmount.style.fontWeight = 'bold';
+      totalAmount.style.color = '#0f766e'; // teal-700
+      totalAmount.style.margin = '0';
+      totalSection.appendChild(totalAmount);
+
+      element.appendChild(totalSection);
+
+      // Add balances section
+      const balancesTitle = document.createElement('h2');
+      balancesTitle.textContent = 'Individual Balances';
+      balancesTitle.style.color = '#0f766e'; // teal-700
+      balancesTitle.style.marginTop = '30px';
+      element.appendChild(balancesTitle);
+
+      const balancesTable = document.createElement('table');
+      balancesTable.style.width = '100%';
+      balancesTable.style.borderCollapse = 'collapse';
+      balancesTable.style.marginBottom = '30px';
+
+      // Add table header
+      const balancesHeader = document.createElement('tr');
+      ['Friend', 'Paid', 'Owes', 'Net Balance'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.style.textAlign = text === 'Friend' ? 'left' : 'right';
+        th.style.padding = '8px';
+        th.style.borderBottom = '1px solid #e5e7eb'; // gray-200
+        balancesHeader.appendChild(th);
+      });
+      balancesTable.appendChild(balancesHeader);
+
+      // Add rows for each friend
+      balances.forEach(balance => {
+        const row = document.createElement('tr');
+
+        const nameCell = document.createElement('td');
+        nameCell.textContent = getFriendName(balance.friendId);
+        nameCell.style.padding = '8px';
+        nameCell.style.borderBottom = '1px solid #e5e7eb'; // gray-200
+        row.appendChild(nameCell);
+
+        const paidCell = document.createElement('td');
+        paidCell.textContent = `${currencySymbol}${balance.paid.toFixed(2)}`;
+        paidCell.style.textAlign = 'right';
+        paidCell.style.padding = '8px';
+        paidCell.style.borderBottom = '1px solid #e5e7eb'; // gray-200
+        row.appendChild(paidCell);
+
+        const owesCell = document.createElement('td');
+        owesCell.textContent = `${currencySymbol}${balance.owes.toFixed(2)}`;
+        owesCell.style.textAlign = 'right';
+        owesCell.style.padding = '8px';
+        owesCell.style.borderBottom = '1px solid #e5e7eb'; // gray-200
+        row.appendChild(owesCell);
+
+        const netCell = document.createElement('td');
+        netCell.textContent = `${balance.netBalance > 0 ? '+' : ''}${currencySymbol}${balance.netBalance.toFixed(2)}`;
+        netCell.style.textAlign = 'right';
+        netCell.style.padding = '8px';
+        netCell.style.fontWeight = 'bold';
+        netCell.style.color = balance.netBalance > 0 ? '#059669' : balance.netBalance < 0 ? '#dc2626' : '#000000';
+        netCell.style.borderBottom = '1px solid #e5e7eb'; // gray-200
+        row.appendChild(netCell);
+
+        balancesTable.appendChild(row);
+      });
+
+      element.appendChild(balancesTable);
+
+      // Add settlement plan section
+      const planTitle = document.createElement('h2');
+      planTitle.textContent = 'Settlement Plan';
+      planTitle.style.color = '#0f766e'; // teal-700
+      planTitle.style.marginTop = '30px';
+      element.appendChild(planTitle);
+
+      if (transactions.length === 0) {
+        const noTransactions = document.createElement('p');
+        noTransactions.textContent = 'Everyone is settled up!';
+        noTransactions.style.textAlign = 'center';
+        noTransactions.style.color = '#6b7280'; // gray-500
+        noTransactions.style.fontStyle = 'italic';
+        element.appendChild(noTransactions);
+      } else {
+        transactions.forEach((transaction, index) => {
+          const transactionDiv = document.createElement('div');
+          transactionDiv.style.padding = '10px';
+          transactionDiv.style.border = '1px solid #e5e7eb'; // gray-200
+          transactionDiv.style.borderRadius = '8px';
+          transactionDiv.style.marginBottom = '10px';
+          transactionDiv.style.display = 'flex';
+          transactionDiv.style.justifyContent = 'space-between';
+          transactionDiv.style.alignItems = 'center';
+
+          const fromName = document.createElement('div');
+          fromName.textContent = getFriendName(transaction.from);
+          fromName.style.fontWeight = 'bold';
+          transactionDiv.appendChild(fromName);
+
+          const amountDiv = document.createElement('div');
+          amountDiv.textContent = `${currencySymbol}${transaction.amount.toFixed(2)}`;
+          amountDiv.style.color = '#0f766e'; // teal-700
+          amountDiv.style.fontWeight = 'bold';
+          transactionDiv.appendChild(amountDiv);
+
+          const toName = document.createElement('div');
+          toName.textContent = getFriendName(transaction.to);
+          toName.style.fontWeight = 'bold';
+          transactionDiv.appendChild(toName);
+
+          element.appendChild(transactionDiv);
+        });
+      }
+
+      // Generate PDF
+      const opt = {
+        margin: 10,
+        filename: `trip-settlement-${new Date().toISOString().split("T")[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      // Use html2pdf to generate PDF
+      try {
+        // There are two ways html2pdf might be structured
+        if (typeof html2pdfModule === 'function') {
+          // Direct function call
+          html2pdfModule(element, opt);
+        } else if (html2pdfModule && typeof html2pdfModule.from === 'function') {
+          // Method chain
+          html2pdfModule.from(element).set(opt).save();
+        } else {
+          console.error('PDF module loaded but has unexpected structure:', html2pdfModule);
+        }
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+      }
+    }
   };
 
   return (
