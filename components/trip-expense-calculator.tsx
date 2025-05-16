@@ -264,6 +264,25 @@ export const TripExpenseCalculator = () => {
     setActiveTab("friends")
   }
 
+  const deleteTrip = (tripId: string) => {
+    const updatedHistory = history.filter(trip => trip.id !== tripId);
+    setHistory(updatedHistory);
+
+    toast({
+      title: "Trip deleted",
+      description: "The trip has been removed from history",
+    });
+  }
+
+  const clearAllHistory = () => {
+    setHistory([]);
+
+    toast({
+      title: "History cleared",
+      description: "All saved trips have been deleted",
+    });
+  }
+
   const clearCurrentTripData = () => {
     // Save the history data
     const savedHistory = localStorage.getItem("tripCalculator_history");
@@ -290,18 +309,18 @@ export const TripExpenseCalculator = () => {
 
   return (
     <Card className="shadow-lg">
-      <CardHeader className="bg-teal-700 text-white rounded-t-lg p-3 sm:p-6">
-        <CardTitle className="text-lg sm:text-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <CardHeader className="p-3 text-white bg-teal-700 rounded-t-lg sm:p-6">
+        <CardTitle className="flex flex-col items-start justify-between gap-3 text-lg sm:text-xl sm:flex-row sm:items-center">
           <span>Trip Expense Manager</span>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center w-full gap-2 sm:w-auto">
             <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="bg-teal-600 border-teal-500 hover:bg-teal-500 h-8 px-2 flex-1 sm:flex-none"
+                  className="flex-1 h-8 px-2 bg-teal-600 border-teal-500 hover:bg-teal-500 sm:flex-none"
                 >
-                  <SaveIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <SaveIcon className="w-3 h-3 mr-1 sm:h-4 sm:w-4 sm:mr-2" />
                   <span className="text-xs sm:text-sm">Save Trip</span>
                 </Button>
               </DialogTrigger>
@@ -326,9 +345,9 @@ export const TripExpenseCalculator = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="bg-teal-600 border-teal-500 hover:bg-teal-500 h-8 px-2 flex-1 sm:flex-none"
+                  className="flex-1 h-8 px-2 bg-teal-600 border-teal-500 hover:bg-teal-500 sm:flex-none"
                 >
-                  <Trash2Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <Trash2Icon className="w-3 h-3 mr-1 sm:h-4 sm:w-4 sm:mr-2" />
                   <span className="text-xs sm:text-sm">Clear All</span>
                 </Button>
               </AlertDialogTrigger>
@@ -342,13 +361,13 @@ export const TripExpenseCalculator = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel
-                    className="h-8 sm:h-10 text-xs sm:text-sm"
+                    className="h-8 text-xs sm:h-10 sm:text-sm"
                   >
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={clearCurrentTripData}
-                    className="h-8 sm:h-10 text-xs sm:text-sm bg-red-600 hover:bg-red-700"
+                    className="h-8 text-xs bg-red-600 sm:h-10 sm:text-sm hover:bg-red-700"
                   >
                     Clear All Data
                   </AlertDialogAction>
@@ -375,14 +394,14 @@ export const TripExpenseCalculator = () => {
       </CardHeader>
       <CardContent className="p-0">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full h-auto p-2 rounded-none">
-            <TabsTrigger value="friends" className="text-xs sm:text-sm py-2">Friends</TabsTrigger>
-            <TabsTrigger value="categories" className="text-xs sm:text-sm py-2">Categories</TabsTrigger>
-            <TabsTrigger value="expenses" className="text-xs sm:text-sm py-2">Add Expense</TabsTrigger>
-            <TabsTrigger value="list" className="text-xs sm:text-sm py-2">All Expenses</TabsTrigger>
-            <TabsTrigger value="settlement" className="text-xs sm:text-sm py-2">Settlement</TabsTrigger>
-            <TabsTrigger value="history" className="text-xs sm:text-sm py-2 flex items-center justify-center">
-              <HistoryIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+          <TabsList className="grid w-full h-auto grid-cols-3 p-2 rounded-none sm:grid-cols-6">
+            <TabsTrigger value="friends" className="py-2 text-xs sm:text-sm">Friends</TabsTrigger>
+            <TabsTrigger value="categories" className="py-2 text-xs sm:text-sm">Categories</TabsTrigger>
+            <TabsTrigger value="expenses" className="py-2 text-xs sm:text-sm">Add Expense</TabsTrigger>
+            <TabsTrigger value="list" className="py-2 text-xs sm:text-sm">All Expenses</TabsTrigger>
+            <TabsTrigger value="settlement" className="py-2 text-xs sm:text-sm">Settlement</TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center justify-center py-2 text-xs sm:text-sm">
+              <HistoryIcon className="w-3 h-3 mr-1 sm:h-4 sm:w-4" />
               <span>History</span>
             </TabsTrigger>
           </TabsList>
@@ -395,7 +414,7 @@ export const TripExpenseCalculator = () => {
               onRemoveFriend={removeFriend}
             />
             {friends.length > 0 && (
-              <div className="mt-4 flex justify-end">
+              <div className="flex justify-end mt-4">
                 <Button size={isMobile ? "sm" : "default"} onClick={() => setActiveTab("expenses")}>
                   Next: Add Expenses
                 </Button>
@@ -415,7 +434,7 @@ export const TripExpenseCalculator = () => {
           <TabsContent value="expenses" className="p-3 sm:p-4">
             <ExpenseForm friends={friends} categories={categories} onAddExpense={addExpense} />
             {expenses.length > 0 && (
-              <div className="mt-4 flex justify-end space-x-2">
+              <div className="flex justify-end mt-4 space-x-2">
                 <Button variant="outline" size={isMobile ? "sm" : "default"} onClick={() => setActiveTab("list")}>
                   View All Expenses
                 </Button>
@@ -436,7 +455,7 @@ export const TripExpenseCalculator = () => {
               onRemoveExpense={removeExpense}
             />
             {expenses.length > 0 && (
-              <div className="mt-4 flex justify-end">
+              <div className="flex justify-end mt-4">
                 <Button size={isMobile ? "sm" : "default"} onClick={() => setActiveTab("settlement")}>
                   Calculate Settlement
                 </Button>
@@ -449,7 +468,13 @@ export const TripExpenseCalculator = () => {
           </TabsContent>
 
           <TabsContent value="history" className="p-3 sm:p-4">
-            <HistoryManager history={history} onLoadTrip={loadTrip} onClearTrip={clearCurrentTripData} />
+            <HistoryManager
+              history={history}
+              onLoadTrip={loadTrip}
+              onClearTrip={clearCurrentTripData}
+              onDeleteTrip={deleteTrip}
+              onClearAllHistory={clearAllHistory}
+            />
           </TabsContent>
         </Tabs>
       </CardContent>

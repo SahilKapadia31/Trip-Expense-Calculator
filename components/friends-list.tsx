@@ -72,8 +72,8 @@ export const FriendsList = ({ friends, onAddFriend, onUpdateFriend, onRemoveFrie
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex items-center">
-          <UserPlus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+        <h2 className="flex items-center mb-2 text-lg font-semibold sm:text-xl sm:mb-4">
+          <UserPlus className="w-4 h-4 mr-2 sm:h-5 sm:w-5" />
           {editingId ? "Edit Friend" : "Add Friend"}
         </h2>
 
@@ -87,11 +87,11 @@ export const FriendsList = ({ friends, onAddFriend, onUpdateFriend, onRemoveFrie
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Friend's name"
                 required
-                className="h-8 sm:h-10 text-sm"
+                className="h-8 text-sm sm:h-10"
               />
             </div>
 
-            <div className="flex items-center space-x-2 h-8 sm:h-10 mt-2 sm:mt-8">
+            <div className="flex items-center h-8 mt-2 space-x-2 sm:h-10 sm:mt-8">
               <Switch
                 id="vegetarian"
                 checked={isVegetarian}
@@ -101,7 +101,7 @@ export const FriendsList = ({ friends, onAddFriend, onUpdateFriend, onRemoveFrie
               <Label htmlFor="vegetarian" className="text-xs sm:text-sm">Vegetarian</Label>
               {/* </div>
 
-            <div className="flex items-center space-x-2 h-8 mt-2 sm:mt-6 sm:h-10"> */}
+            <div className="flex items-center h-8 mt-2 space-x-2 sm:mt-6 sm:h-10"> */}
               <Switch
                 id="drinker"
                 checked={isDrinker}
@@ -116,7 +116,7 @@ export const FriendsList = ({ friends, onAddFriend, onUpdateFriend, onRemoveFrie
             <Button
               type="submit"
               size={isMobile ? "sm" : "default"}
-              className="h-8 sm:h-10 text-xs sm:text-sm"
+              className="h-8 text-xs sm:h-10 sm:text-sm"
             >
               {editingId ? "Update" : "Add"} Friend
             </Button>
@@ -126,7 +126,7 @@ export const FriendsList = ({ friends, onAddFriend, onUpdateFriend, onRemoveFrie
                 variant="outline"
                 onClick={cancelEditing}
                 size={isMobile ? "sm" : "default"}
-                className="h-8 sm:h-10 text-xs sm:text-sm"
+                className="h-8 text-xs sm:h-10 sm:text-sm"
               >
                 Cancel
               </Button>
@@ -136,19 +136,19 @@ export const FriendsList = ({ friends, onAddFriend, onUpdateFriend, onRemoveFrie
       </div>
 
       <div>
-        <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4">Friends List ({friends.length})</h2>
+        <h2 className="mb-2 text-lg font-semibold sm:text-xl sm:mb-4">Friends List ({friends.length})</h2>
 
         {friends.length === 0 ? (
-          <p className="text-gray-500 italic text-sm">No friends added yet. Add your first friend above.</p>
+          <p className="text-sm italic text-gray-500">No friends added yet. Add your first friend above.</p>
         ) : (
           <div className="grid grid-cols-1 gap-2 sm:gap-4">
             {friends.map((friend) => (
               <Card key={friend.id} className="overflow-hidden">
-                <CardContent className="p-2 sm:p-3 flex justify-between items-center">
+                <CardContent className="flex items-center justify-between p-2 sm:p-3">
                   <div>
-                    <h3 className="font-medium text-sm sm:text-base">{friend.name}</h3>
-                    <div className="text-xs sm:text-sm text-gray-500 mt-1">
-                      <span className={friend.isVegetarian ? "text-green-600" : "text-gray-500"}>
+                    <h3 className="text-sm font-medium sm:text-base">{friend.name}</h3>
+                    <div className="mt-1 text-xs text-gray-500 sm:text-sm">
+                      <span className={friend.isVegetarian ? "text-green-600" : "text-red-600"}>
                         {friend.isVegetarian ? "Vegetarian" : "Non-vegetarian"}
                       </span>
                       {" • "}
@@ -165,7 +165,7 @@ export const FriendsList = ({ friends, onAddFriend, onUpdateFriend, onRemoveFrie
                       onClick={() => startEditing(friend)}
                       className="h-7 w-7 sm:h-8 sm:w-8"
                     >
-                      <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <Pencil className="w-3 h-3 sm:h-4 sm:w-4" />
                     </Button>
                     <Button
                       size="icon"
@@ -173,7 +173,7 @@ export const FriendsList = ({ friends, onAddFriend, onUpdateFriend, onRemoveFrie
                       onClick={() => onRemoveFriend(friend.id)}
                       className="h-7 w-7 sm:h-8 sm:w-8"
                     >
-                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <Trash2 className="w-3 h-3 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
                 </CardContent>

@@ -97,8 +97,8 @@ export const SettlementSummary = ({ friends, expenses, currency }: SettlementSum
   const transactions = useMemo(() => {
     const transactions: Transaction[] = []
 
-    // Create a copy of balances to work with
-    const workingBalances = [...balances]
+    // Create a deep copy of balances to work with
+    const workingBalances = balances.map(b => ({ ...b }))
 
     // Sort by net balance (ascending)
     workingBalances.sort((a, b) => a.netBalance - b.netBalance)
@@ -143,6 +143,7 @@ export const SettlementSummary = ({ friends, expenses, currency }: SettlementSum
 
     return transactions
   }, [balances])
+
 
   const getFriendName = (id: string) => {
     const friend = friends.find((f) => f.id === id)
@@ -379,35 +380,35 @@ export const SettlementSummary = ({ friends, expenses, currency }: SettlementSum
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-        <h2 className="text-lg sm:text-xl font-semibold">Settlement Summary</h2>
-        <div className="flex space-x-2 flex-wrap w-full sm:w-auto">
+      <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-0">
+        <h2 className="text-lg font-semibold sm:text-xl">Settlement Summary</h2>
+        <div className="flex flex-wrap w-full space-x-2 sm:w-auto">
           <Button
             variant="outline"
             size="sm"
             onClick={downloadSettlementCSV}
-            className="h-8 text-xs sm:text-sm flex-1 sm:flex-auto"
+            className="flex-1 h-8 text-xs sm:text-sm sm:flex-auto"
           >
-            <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <Download className="w-3 h-3 mr-1 sm:h-4 sm:w-4 sm:mr-2" />
             {isMobile ? "CSV" : "Download CSV"}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={downloadSettlementPDF}
-            className="h-8 text-xs sm:text-sm flex-1 sm:flex-auto"
+            className="flex-1 h-8 text-xs sm:text-sm sm:flex-auto"
           >
-            <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <FileText className="w-3 h-3 mr-1 sm:h-4 sm:w-4 sm:mr-2" />
             {isMobile ? "PDF" : "Download PDF"}
           </Button>
         </div>
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div></div>
         <div className="text-right">
-          <p className="text-xs sm:text-sm text-gray-500">Total Trip Expenses</p>
-          <p className="text-lg sm:text-2xl font-bold text-teal-700">
+          <p className="text-xs text-gray-500 sm:text-sm">Total Trip Expenses</p>
+          <p className="text-lg font-bold text-teal-700 sm:text-2xl">
             {currencySymbol}
             {totalExpenses.toFixed(2)}
           </p>
@@ -416,23 +417,23 @@ export const SettlementSummary = ({ friends, expenses, currency }: SettlementSum
 
       {expenses.length === 0 ? (
         <Card>
-          <CardContent className="p-4 sm:p-6 text-center">
-            <p className="text-gray-500 italic text-sm">No expenses to settle.</p>
+          <CardContent className="p-4 text-center sm:p-6">
+            <p className="text-sm italic text-gray-500">No expenses to settle.</p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
           <Card>
-            <CardHeader className="pb-0 pt-3 px-3 sm:p-6 sm:pb-0">
+            <CardHeader className="px-3 pt-3 pb-0 sm:p-6 sm:pb-0">
               <CardTitle className="text-base sm:text-lg">Individual Balances</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 sm:p-6 overflow-x-auto">
+            <CardContent className="p-0 overflow-x-auto sm:p-6">
               {isMobile ? (
-                <div className="space-y-3 p-3">
+                <div className="p-3 space-y-3">
                   {balances.map((balance) => (
-                    <div key={balance.friendId} className="border rounded-md p-2">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-medium text-sm">{getFriendName(balance.friendId)}</span>
+                    <div key={balance.friendId} className="p-2 border rounded-md">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">{getFriendName(balance.friendId)}</span>
                         <span
                           className={`text-sm font-medium ${balance.netBalance > 0 ? "text-green-600" : balance.netBalance < 0 ? "text-red-600" : ""
                             }`}
@@ -488,23 +489,23 @@ export const SettlementSummary = ({ friends, expenses, currency }: SettlementSum
           </Card>
 
           <Card>
-            <CardHeader className="pb-0 pt-3 px-3 sm:p-6 sm:pb-0">
+            <CardHeader className="px-3 pt-3 pb-0 sm:p-6 sm:pb-0">
               <CardTitle className="text-base sm:text-lg">Settlement Plan</CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-6">
               {transactions.length === 0 ? (
-                <p className="text-center text-gray-500 italic text-sm">Everyone is settled up!</p>
+                <p className="text-sm italic text-center text-gray-500">Everyone is settled up!</p>
               ) : isMobile ? (
                 <div className="space-y-3">
                   {transactions.map((transaction, index) => (
-                    <div key={index} className="p-2 sm:p-3 border rounded-lg">
-                      <div className="text-xs sm:text-sm text-center mb-1">
+                    <div key={index} className="p-2 border rounded-lg sm:p-3">
+                      <div className="mb-1 text-xs text-center sm:text-sm">
                         <span className="font-medium">{getFriendName(transaction.from)}</span>
                         <span className="text-gray-500"> pays </span>
                         <span className="font-medium">{getFriendName(transaction.to)}</span>
                       </div>
-                      <div className="flex justify-center items-center">
-                        <span className="font-bold text-teal-700 text-sm sm:text-base">
+                      <div className="flex items-center justify-center">
+                        <span className="text-sm font-bold text-teal-700 sm:text-base">
                           {currencySymbol}
                           {transaction.amount.toFixed(2)}
                         </span>
@@ -518,12 +519,12 @@ export const SettlementSummary = ({ friends, expenses, currency }: SettlementSum
                     <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="font-medium">{getFriendName(transaction.from)}</div>
                       <div className="flex items-center text-gray-500">
-                        <ArrowRight className="mx-2 h-4 w-4" />
+                        <ArrowRight className="w-4 h-4 mx-2" />
                         <span className="font-bold text-teal-700">
                           {currencySymbol}
                           {transaction.amount.toFixed(2)}
                         </span>
-                        <ArrowRight className="mx-2 h-4 w-4" />
+                        <ArrowRight className="w-4 h-4 mx-2" />
                       </div>
                       <div className="font-medium">{getFriendName(transaction.to)}</div>
                     </div>
